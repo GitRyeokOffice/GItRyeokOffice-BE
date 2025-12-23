@@ -1,6 +1,6 @@
 package com.example.gitryeokoffice.global.util;
 
-import com.example.gitryeokoffice.global.exception.ApplicationException;
+import com.example.gitryeokoffice.user.exception.UserErrorCode;
 import com.example.gitryeokoffice.user.exception.UserException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -18,7 +18,7 @@ public class CookieUtil {
      */
     public static String extractToken(Cookie[] cookies) {
         if (cookies == null) {
-            throw new ApplicationException(UserException.MISSING_TOKEN);
+            throw new UserException(UserErrorCode.MISSING_TOKEN);
         }
 
         for (Cookie cookie : cookies) {
@@ -27,7 +27,7 @@ public class CookieUtil {
             }
         }
 
-        throw new ApplicationException(UserException.MISSING_TOKEN);
+        throw new UserException(UserErrorCode.MISSING_TOKEN);
     }
 
     /**

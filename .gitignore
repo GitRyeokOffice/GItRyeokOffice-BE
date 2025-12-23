@@ -42,3 +42,5 @@ application-secret.yml
 
 # Docker volumes
 mysql_data/
+
+application.yaml

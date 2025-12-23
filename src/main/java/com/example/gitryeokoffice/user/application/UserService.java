@@ -1,9 +1,9 @@
 package com.example.gitryeokoffice.user.application;
 
-import com.example.gitryeokoffice.global.exception.ApplicationException;
 import com.example.gitryeokoffice.global.util.JwtTokenProvider;
 import com.example.gitryeokoffice.user.domain.User;
 import com.example.gitryeokoffice.user.domain.UserRepository;
+import com.example.gitryeokoffice.user.exception.UserErrorCode;
 import com.example.gitryeokoffice.user.exception.UserException;
 import com.example.gitryeokoffice.user.presentation.dto.LoginRequest;
 import com.example.gitryeokoffice.user.presentation.dto.SignupRequest;
@@ -30,26 +30,31 @@ public class UserService {
      */
     @Transactional
     public UserResponse signup(SignupRequest request) {
-        // 닉네임 중복 체크
-        if (userRepository.existsByNickname(request.nickname())) {
-            throw new ApplicationException(UserException.DUPLICATE_NICKNAME);
+        // GitHub 사용자명 중복 체크
+        if (userRepository.existsByGithubLogin(request.githubLogin())) {
+            throw new UserException(UserErrorCode.DUPLICATE_GITHUB_LOGIN);
         }
 
-        // GitHub ID 중복 체크
-        if (userRepository.existsByGithubId(request.githubId())) {
-            throw new ApplicationException(UserException.DUPLICATE_GITHUB_ID);
+        // 닉네임 중복 체크
+        if (request.displayName() != null && userRepository.existsByDisplayName(request.displayName())) {
+            throw new UserException(UserErrorCode.DUPLICATE_DISPLAY_NAME);
         }
 
         // User 엔티티 생성 및 저장
         User user = User.create(
+                request.githubLogin(),
+                request.email(),
                 request.password(), // TODO: 비밀번호 암호화 필요 (BCrypt 등)
-                request.nickname(),
-                request.githubId(),
-                request.jobType()
+                request.displayName(),
+                request.roleType(),
+                request.position(),
+                request.organization(),
+                request.projectExperienceCount(),
+                request.isSprout()
         );
 
         User savedUser = userRepository.save(user);
-        log.info("회원가입 완료. userId: {}, nickname: {}", savedUser.getId(), savedUser.getNickname());
+        log.info("회원가입 완료. userId: {}, displayName: {}", savedUser.getId(), savedUser.getDisplayName());
 
         return UserResponse.from(savedUser);
     }
@@ -59,17 +64,17 @@ public class UserService {
      */
     public String login(LoginRequest request) {
         // 닉네임으로 사용자 조회
-        User user = userRepository.findByNickname(request.nickname())
-                .orElseThrow(() -> new ApplicationException(UserException.USER_NOT_FOUND));
+        User user = userRepository.findByDisplayName(request.nickname())
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
         // 비밀번호 검증 (TODO: BCrypt 사용)
         if (!user.getPassword().equals(request.password())) {
-            throw new ApplicationException(UserException.INVALID_PASSWORD);
+            throw new UserException(UserErrorCode.INVALID_CREDENTIALS);
         }
 
         // JWT 토큰 생성 및 반환
         String token = jwtTokenProvider.createToken(user.getId());
-        log.info("로그인 성공. userId: {}, nickname: {}", user.getId(), user.getNickname());
+        log.info("로그인 성공. userId: {}, displayName: {}", user.getId(), user.getDisplayName());
 
         return token;
     }
@@ -79,7 +84,7 @@ public class UserService {
      */
     public UserResponse getUserById(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ApplicationException(UserException.USER_NOT_FOUND));
+                .orElseThrow(() -> new UserException(UserErrorCode.USER_NOT_FOUND));
 
         return UserResponse.from(user);
     }

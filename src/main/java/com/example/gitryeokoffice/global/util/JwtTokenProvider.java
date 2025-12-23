@@ -1,6 +1,6 @@
 package com.example.gitryeokoffice.global.util;
 
-import com.example.gitryeokoffice.global.exception.ApplicationException;
+import com.example.gitryeokoffice.user.exception.UserErrorCode;
 import com.example.gitryeokoffice.user.exception.UserException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -58,7 +58,7 @@ public class JwtTokenProvider {
                     .parseSignedClaims(token);
         } catch (Exception e) {
             log.error("JWT 토큰 검증 실패: {}", e.getMessage());
-            throw new ApplicationException(UserException.INVALID_TOKEN);
+            throw new UserException(UserErrorCode.INVALID_TOKEN);
         }
     }
 

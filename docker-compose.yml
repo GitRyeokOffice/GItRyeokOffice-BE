@@ -2,11 +2,14 @@ services:
 
   mysql-server:
     image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
     environment:
       MYSQL_ROOT_PASSWORD: asd1234
       MYSQL_DATABASE: gitryeokoffice
+      MYSQL_USER: gitryeok
+      MYSQL_PASSWORD: gitryeok123
     ports:
-      - "3306:3306"
+      - "3307:3306"
     container_name: mysql-gitryeokoffice
     volumes:
       - ./mysql_data:/var/lib/mysql
