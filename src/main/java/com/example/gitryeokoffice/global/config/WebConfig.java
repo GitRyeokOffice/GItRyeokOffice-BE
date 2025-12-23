@@ -29,7 +29,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .excludePathPatterns(
                         "/api/users/signup",  // 회원가입은 인증 불필요
                         "/api/users/login",   // 로그인은 인증 불필요
-                        "/api/users/logout"   // 로그아웃은 인증 불필요
+                        "/api/users/logout",  // 로그아웃은 인증 불필요
+                        "/api/v1/dev-vibe/**" // Dev-Vibe 분석 엔드포인트는 인증 불필요
                 );
     }
 
